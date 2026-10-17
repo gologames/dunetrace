@@ -48,6 +48,27 @@ env -u PYTHONPATH PYTHONPATH=packages/sdk-py python -m pytest packages/sdk-py/te
 The `PYTHONPATH` for each service is the one in its `make test-*` target — see
 the [`Makefile`](Makefile) if you run a suite by hand.
 
+## Commit messages
+
+Use scoped commit messages:
+
+```text
+<scope>: <description>
+```
+
+- Scope identifies the affected component, e.g. `ingest`, `api`, `detector`,
+  `sdk-py`, `sdk-ts`, `dashboard`, or `docs`.
+- Keep the description short, specific and imperative.
+- Merge and revert commits may use Git's default format.
+
+Examples:
+
+```text
+ingest: reject oversized payloads
+sdk-py: retry failed requests
+docs: update installation instructions
+```
+
 ## Before you push
 
 Install the git hooks once — they run ruff, mypy, the docs-consistency check,
