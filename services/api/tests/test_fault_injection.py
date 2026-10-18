@@ -28,7 +28,7 @@ pinned below: dict-valued tool args silently disabled three detectors, and
 
 No DB, no network, no credentials, no clock.
 
-Run: make test-api
+Run: task test:api
   or PYTHONPATH=packages/schemas-py:packages/sdk-py:services/explainer:services/api \
        python -m pytest services/api/tests/test_fault_injection.py -v
 """

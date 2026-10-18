@@ -17,7 +17,7 @@ Both holes are fixed here: every service, and every comparison form.
 
 Deliberately source-text based rather than import based, so it needs no
 service on the PYTHONPATH and runs from the repo root under
-`make test-schema-parity`.
+`task test:schema-parity`.
 
 Run: python -m pytest tests/test_run_scoping.py -v
 """

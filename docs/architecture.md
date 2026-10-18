@@ -895,7 +895,7 @@ the six service schema files plus `migrations.py` as text, lists every
 exits 1 on any multi-owner table or stray column; it runs in CI with a
 baseline of zero (`--check` against `scripts/schema_owners_baseline.json`).
 Its sibling `tests/test_schema_parity.py` asserts column-for-column agreement
-for any duplicate that reappears. `make check-schema-owners` runs both.
+for any duplicate that reappears. `task db:check-ownership` runs both.
 `scripts/verify_schema_boot_order.py` is the runtime counterpart: against a
 real Postgres it boots every service first on a fresh database, runs
 concurrent appliers, checks idempotence, and upgrades a database built by

@@ -7,7 +7,7 @@ deliberately does not depend on the SDK package at runtime. This test is the
 enforcement mechanism instead: it fails CI the moment the two drift.
 
 Requires packages/sdk-py on the path in addition to this package — see
-PYTHONPATH in the Makefile / CLAUDE.md.
+PYTHONPATH in tasks/test.yml.
 
 Run:
     PYTHONPATH=packages/sdk-py:packages/schemas-py \

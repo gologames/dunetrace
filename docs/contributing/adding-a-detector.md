@@ -204,7 +204,7 @@ to exist in code and vice-versa.
 ### 9. Run the checks
 
 ```bash
-make test
+task test
 pre-commit run --all-files    # ruff, mypy, docs-consistency, the test suites
 ```
 

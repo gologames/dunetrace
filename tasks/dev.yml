@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  up:
+    desc: Start the local stack
+    cmd: docker compose up -d
+
+  down:
+    desc: Stop the local stack
+    cmd: docker compose down
+
+  logs:
+    desc: Follow local stack logs
+    cmd: docker compose logs -f
+
+  build:
+    desc: Build local images
+    cmd: docker compose build

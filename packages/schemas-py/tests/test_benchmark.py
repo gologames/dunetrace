@@ -16,8 +16,8 @@ per-hook budget these models never run inside, and ~1000x cheaper than the
 ~5ms ingest request these models validate.
 
 **Why this measures CPU time against a calibration baseline rather than raw
-wall clock.** This test runs inside the default `make test` target, and `make`
-stops at the first failing target — so a flaky bound here hides every suite
+wall clock.** This test runs inside `task test`, which stops at the first
+failing suite — so a flaky bound here hides every suite
 after it. A wall-clock bound is exactly that flaky: on a machine at load
 average 160 (a local llama-server at 231% CPU), unchanged code measured 18µs to
 108µs against the 10µs bound, because wall clock counts the time the process

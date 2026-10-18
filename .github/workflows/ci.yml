@@ -90,17 +90,20 @@ jobs:
           cache-dependency-path: packages/sdk-py/pyproject.toml
       # dev extra provides mypy + pytest-timeout, so no separate installs needed.
       - run: pip install -e "packages/sdk-py[dev,langchain]"
-      # Same Makefile target `make test` uses, so the two cannot disagree about
+      - uses: go-task/setup-task@v2
+        with:
+          version: "3.54.0"
+      # Same Taskfile task `task test` uses, so the two cannot disagree about
       # which tests exist. PYTEST_ADDOPTS' --timeout kills (and dumps the stack
       # of) any single test that hangs, so a deadlock fails in seconds with a
       # named culprit instead of blocking the whole run for hours.
       - name: Run tests
         env:
           PYTEST_ADDOPTS: --timeout=120
-        run: make test-sdk-py
+        run: task test:sdk-py
       - run: python -m mypy packages/sdk-py/dunetrace/ --ignore-missing-imports --no-error-summary --config-file packages/sdk-py/pyproject.toml
 
-  # `make test` runs twelve targets; this workflow's other jobs covered ten of
+  # `task test` runs twelve suites; this workflow's other jobs covered ten of
   # them. test-schemas (132 tests) and test-schema-parity (4) ran in NO CI job
   # at all — which is where dunetrace_schemas/metrics.py and the whole
   # migrations.py runner live, i.e. the shared code every service boots on.
@@ -125,20 +128,23 @@ jobs:
       #     falls back to SDK defaults when it is absent, so 16 of
       #     test_detector_config.py's assertions fail on parsed values.
       - run: pip install -e "packages/schemas-py[metrics]" PyYAML pytest pytest-timeout
-      # Both targets come from the Makefile so PYTHONPATH has one source of
-      # truth. test-schemas puts packages/sdk-py on it for test_sdk_parity.py,
+      - uses: go-task/setup-task@v2
+        with:
+          version: "3.54.0"
+      # Both tasks come from tasks/test.yml so PYTHONPATH has one source of
+      # truth. test:schemas puts packages/sdk-py on it for test_sdk_parity.py,
       # which imports dunetrace to check the generated enums still match; the
       # SDK has no required dependencies, so the source tree is enough.
       - name: Run schemas tests
         env:
           PYTEST_ADDOPTS: --timeout=120
-        run: make test-schemas
+        run: task test:schemas
       # Cross-service: parses (never imports) every service's DDL and fails if
       # two of them declare the same table. No PYTHONPATH, stdlib + pytest.
       - name: Run schema-parity tests
         env:
           PYTEST_ADDOPTS: --timeout=120
-        run: make test-schema-parity
+        run: task test:schema-parity
 
   # The pre-commit config carries checks that exist nowhere else in CI — bandit,
   # detect-private-key and scripts/check_endpoint_conventions.py among them — so
@@ -220,7 +226,10 @@ jobs:
           cache-dependency-path: ${{ matrix.requirements }}
       - run: pip install -r ${{ matrix.requirements }} pytest pytest-asyncio pytest-timeout ${{ matrix.extra || '' }}
       - run: pip install -e packages/sdk-py
-      # Calls the Makefile target so PYTHONPATH has exactly ONE source of truth.
+      - uses: go-task/setup-task@v2
+        with:
+          version: "3.54.0"
+      # Calls the Taskfile task so PYTHONPATH has exactly ONE source of truth.
       # Duplicating it here is what let this workflow drift and miss
       # packages/schemas-py, which broke the moment services began importing
       # dunetrace_schemas (migrations, key hashing, scopes).
@@ -229,7 +238,7 @@ jobs:
       - name: Run tests
         env:
           PYTEST_ADDOPTS: --timeout=120
-        run: make test-${{ matrix.service }}
+        run: task test:${{ matrix.service }}
 
   mcp-server:
     name: MCP Server
@@ -331,7 +340,10 @@ jobs:
       # and the SDK (explainer_svc and the detector both import dunetrace).
       - run: pip install asyncpg pydantic PyYAML
       - run: pip install -e packages/schemas-py -e packages/sdk-py
+      - uses: go-task/setup-task@v2
+        with:
+          version: "3.54.0"
       - name: Verify boot order, concurrency, idempotence and upgrade
         env:
           DATABASE_URL: postgresql://dunetrace:dunetrace@127.0.0.1:5432/postgres
-        run: make verify-boot-order-existing
+        run: task db:test-schema

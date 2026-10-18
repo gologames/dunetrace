@@ -25,7 +25,7 @@ So: a missing dependency is a hard error. The comments in those files asserted
 
 A developer who genuinely wants to run a suite without the library sets::
 
-    DUNETRACE_ALLOW_MISSING_TEST_DEPS=1 make test-alerts
+    DUNETRACE_ALLOW_MISSING_TEST_DEPS=1 task test:alerts
 
 and gets the old skip back — explicitly, at their own request, and never in CI
 (no workflow sets it).

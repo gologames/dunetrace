@@ -27,7 +27,7 @@ Deliberately excluded: `ALTER TABLE`. `check_schema_owners.py` covers those
 `CREATE TABLE` bodies. It also deliberately does not scan `migrations.py`:
 that file is *supposed* to declare tables the services no longer do.
 
-Run: make test-schema-parity
+Run: task test:schema-parity
 """
 
 from __future__ import annotations

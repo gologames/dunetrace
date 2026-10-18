@@ -310,7 +310,7 @@ Services share one Postgres and no message broker: the SDK ships events to the i
 
 ## Contributing
 
-Fork, branch, change, `make test`, PR — open an issue first for new integrations or architecture changes. Requires Python 3.11+, Node.js 22+, Docker + Docker Compose.
+Fork, branch, change, `task test`, PR — open an issue first for new integrations or architecture changes. Requires Python 3.11+, Node.js 22+, Task 3.51.1+, Docker + Docker Compose.
 
 → [CONTRIBUTING.md](CONTRIBUTING.md) (setup and workflow) · [good first issues](https://github.com/dunetrace/dunetrace/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [adding a detector](docs/contributing/adding-a-detector.md)
 

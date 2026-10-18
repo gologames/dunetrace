@@ -12,9 +12,9 @@
 
 ## Testing
 
-<!-- Describe how you tested this. Which `make test-*` targets did you run? -->
+<!-- Describe how you tested this. Which `task test:*` tasks did you run? -->
 
-- [ ] `make test` passes locally
+- [ ] `task test` passes locally
 - [ ] Added / updated tests for the change
 - [ ] Manually verified with a running stack (if applicable)
 

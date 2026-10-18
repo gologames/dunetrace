@@ -97,7 +97,7 @@ repos:
         pass_filenames: false
         files: ^packages/mcp-server/.*\.py$
 
-      # Test hooks below call `make test-*` (services) so the PYTHONPATH for
+      # Test hooks below call `task test:*` so the PYTHONPATH for
       # each service has exactly one source of truth — duplicating it here
       # too is what let ci.yml's ingest PYTHONPATH silently drift and miss
       # packages/schemas-py, which only mattered once ingest_svc/schemas.py
@@ -109,62 +109,62 @@ repos:
       - id: sdk-py-tests
         name: SDK (Python) tests
         language: system
-        entry: bash -c 'cd packages/sdk-py && python -m pytest tests/ -q'
+        entry: task test:sdk-py
         pass_filenames: false
         files: ^packages/sdk-py/.*\.py$
 
       - id: schemas-py-tests
         name: schemas-py tests
         language: system
-        entry: make test-schemas
+        entry: task test:schemas
         pass_filenames: false
         files: ^packages/schemas-py/.*\.py$
 
       - id: ingest-tests
         name: Ingest service tests
         language: system
-        entry: make test-ingest
+        entry: task test:ingest
         pass_filenames: false
         files: ^(services/ingest|packages/schemas-py|packages/sdk-py)/.*\.py$
 
       - id: detector-tests
         name: Detector service tests
         language: system
-        entry: make test-detector
+        entry: task test:detector
         pass_filenames: false
         files: ^(services/detector|packages/sdk-py)/.*\.py$
 
       - id: explainer-tests
         name: Explainer service tests
         language: system
-        entry: make test-explainer
+        entry: task test:explainer
         pass_filenames: false
         files: ^(services/explainer|packages/sdk-py)/.*\.py$
 
       - id: alerts-tests
         name: Alerts service tests
         language: system
-        entry: make test-alerts
+        entry: task test:alerts
         pass_filenames: false
         files: ^(services/alerts|services/explainer|packages/sdk-py)/.*\.py$
 
       - id: api-tests
         name: Customer API tests
         language: system
-        entry: make test-api
+        entry: task test:api
         pass_filenames: false
         files: ^(services/api|services/explainer|packages/sdk-py)/.*\.py$
 
       - id: mcp-tests
         name: MCP server tests
         language: system
-        entry: make test-mcp
+        entry: task test:mcp
         pass_filenames: false
         files: ^packages/mcp-server/.*\.py$
 
       - id: sdk-ts-tests
         name: SDK (TypeScript) tests
         language: system
-        entry: make test-sdk-ts
+        entry: task test:sdk-ts
         pass_filenames: false
         files: ^packages/sdk-ts/.*\.(ts|tsx)$

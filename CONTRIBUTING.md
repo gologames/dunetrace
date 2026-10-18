@@ -18,7 +18,7 @@ first so we can agree on the approach.
 
 ## Dev setup
 
-Requires **Python 3.11+**, **Node.js 22+**, and **Docker + Docker Compose**.
+Requires **Python 3.11+**, **Node.js 22+**, **Task 3.51.1+**, and **Docker + Docker Compose**.
 
 ```bash
 git clone https://github.com/dunetrace/dunetrace
@@ -30,23 +30,25 @@ pip install -e "packages/sdk-py[dev,langchain]"
 
 # Optional: the full stack (only needed for end-to-end / dashboard work)
 cp .env.example .env
-docker compose up -d
+task dev:up
 ```
 
 ## Running tests
 
-No Docker needed — every suite mocks its dependencies.
-
 ```bash
-make test              # everything
-make test-detector     # one service (also: test-api / test-explainer / test-alerts / test-ingest)
-
-# A single package directly (note the PYTHONPATH prefix — each service has its own):
-env -u PYTHONPATH PYTHONPATH=packages/sdk-py python -m pytest packages/sdk-py/tests/ -q
+task test           # non-DB suites, sequentially; stops on the first failure
+task test:detector  # one service (also: test:api / test:explainer / test:alerts / test:ingest)
+task test:sdk-py    # Python SDK
+task test:sdk-ts    # TypeScript SDK
 ```
 
-The `PYTHONPATH` for each service is the one in its `make test-*` target — see
-the [`Makefile`](Makefile) if you run a suite by hand.
+Database checks:
+
+```bash
+task db:check-ownership
+task db:test-schema         # running Postgres; DATABASE_URL required
+task db:test-schema-docker  # temporary Postgres in Docker
+```
 
 ## Commit messages
 
@@ -92,7 +94,7 @@ guide covers this.
 ## Opening the PR
 
 1. Fork, branch off `main`.
-2. Make the change, add tests, run `make test` + `pre-commit run --all-files`.
+2. Make the change, add tests, run `task test` + `pre-commit run --all-files`.
 3. Push and open a PR describing what and why. Link the issue (`Fixes #NN`).
 4. New detectors ship **shadow by default** (they don't alert until validated on
    real traffic) — the guide explains how.

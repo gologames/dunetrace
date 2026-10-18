@@ -11,7 +11,7 @@ they targeted:
 These tests apply the modification to synthetic events, rebuild the run state,
 run the real detectors, and assert the targeted signal actually clears.
 
-Run: make test-api  (or python -m pytest services/api/tests/test_replay.py)
+Run: task test:api  (or python -m pytest services/api/tests/test_replay.py)
 """
 
 from __future__ import annotations

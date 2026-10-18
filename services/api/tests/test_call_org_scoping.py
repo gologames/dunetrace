@@ -16,7 +16,7 @@ Exercised against a tiny in-memory Postgres stand-in that really applies the
 predicates in the SQL, so a query that drops org_id genuinely returns the other
 tenant's rows and the test fails on the data, not on a string match.
 
-Run: make test-api
+Run: task test:api
 """
 
 from __future__ import annotations

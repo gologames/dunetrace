@@ -27,6 +27,7 @@ ENV/
 .env.*.local
 
 # Testing & coverage
+.task/
 .pytest_cache/
 .coverage
 htmlcov/

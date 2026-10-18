@@ -6,7 +6,7 @@ failure types added to the FailureType enum later (e.g. TOOL_ARGUMENT_FABRICATIO
 the top pattern on the overview) were rejected with 422, so clicking them in the
 dashboard broke. These tests assert the allow-list stays in sync with the enum.
 
-Run: make test-api  (or python -m pytest services/api/tests/test_failure_patterns.py)
+Run: task test:api  (or python -m pytest services/api/tests/test_failure_patterns.py)
 """
 
 from __future__ import annotations

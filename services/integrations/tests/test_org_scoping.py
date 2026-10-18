@@ -12,7 +12,7 @@ The read is exercised against a tiny in-memory Postgres stand-in that really
 applies the predicates in the SQL, so dropping org_id genuinely returns the
 wrong tenant's row and the test fails on the data, not on a string match.
 
-Run: make test-integrations
+Run: task test:integrations
 """
 
 from __future__ import annotations

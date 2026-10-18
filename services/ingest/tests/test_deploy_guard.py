@@ -24,7 +24,7 @@ _REPO_ROOT = _SERVICE_DIR.parent.parent
 
 
 def _child_pythonpath() -> str:
-    # The Makefile's PYTHONPATH is relative to the repo root, and the child
+    # The Taskfile's PYTHONPATH is relative to the repo root, and the child
     # runs in an empty temp dir so no developer .env can leak into it — so
     # absolutise what pytest was given and prepend the two paths the import
     # needs regardless of how the suite was launched.

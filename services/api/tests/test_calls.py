@@ -6,7 +6,7 @@ every completion-status path and every derived metric is exercised without a
 database. Live end-to-end shape is verified against the running stack via the
 /v1/calls endpoint.
 
-Run: make test-api  (or python -m pytest services/api/tests/test_calls.py)
+Run: task test:api  (or python -m pytest services/api/tests/test_calls.py)
 """
 
 from __future__ import annotations

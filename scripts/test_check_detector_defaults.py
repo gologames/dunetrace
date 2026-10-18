@@ -50,7 +50,7 @@ class TestCleanConfig(unittest.TestCase):
 
     def test_repo_detectors_yml_has_no_drift(self):
         """The real file. This is the check the CI job actually runs; keeping
-        it here means `make test`-style local runs catch drift too."""
+        it here means `task test`-style local runs catch drift too."""
         self.assertEqual(cdd.check(cdd.REPO_ROOT / "detectors.yml"), [])
 
 
