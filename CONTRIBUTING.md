@@ -16,19 +16,26 @@ clone to a merged PR.
 For anything larger (a new integration, an architecture change), open an issue
 first so we can agree on the approach.
 
-## Dev setup
+## Development setup
 
-Requires **Python 3.11+**, **Node.js 22+**, **Task 3.51.1+**, and **Docker + Docker Compose**.
+Requires **[mise](https://mise.jdx.dev/getting-started.html#installing-mise-cli)** with [shell integration](https://mise.jdx.dev/shell-setup.html) configured.
+Tool versions are pinned in `mise.toml` and `mise.lock`.
 
 ```bash
 git clone https://github.com/dunetrace/dunetrace
 cd dunetrace
 
-# Install the SDK editable, with dev + framework extras (gives you pytest,
-# ruff, mypy, pytest-timeout, regex, langchain/langgraph for the tests).
-pip install -e "packages/sdk-py[dev,langchain]"
+mise install --locked  # first-time setup; afterwards use `task mise:install`
 
-# Optional: the full stack (only needed for end-to-end / dashboard work)
+# Install the local Python SDK and its development dependencies
+python -m pip install -e "packages/sdk-py[dev,langchain]"
+```
+
+## Running services
+
+Requires [Docker](https://docs.docker.com/get-started/get-docker/) + [Docker Compose](https://docs.docker.com/compose/install/).
+
+```bash
 cp .env.example .env
 task dev:up
 ```

@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  install:
+    desc: Install locked project tools
+    cmd: mise install --locked
+
+  update:
+    desc: Update tool dependencies in mise.lock
+    cmd: mise lock --bump

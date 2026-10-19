@@ -310,9 +310,10 @@ Services share one Postgres and no message broker: the SDK ships events to the i
 
 ## Contributing
 
-Fork, branch, change, `task test`, PR — open an issue first for new integrations or architecture changes. Requires Python 3.11+, Node.js 22+, Task 3.51.1+, Docker + Docker Compose.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup,
+testing and contribution guidelines.
 
-→ [CONTRIBUTING.md](CONTRIBUTING.md) (setup and workflow) · [good first issues](https://github.com/dunetrace/dunetrace/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [adding a detector](docs/contributing/adding-a-detector.md)
+[Good first issues](https://github.com/dunetrace/dunetrace/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [Adding a detector](docs/contributing/adding-a-detector.md)
 
 ## Contact
 

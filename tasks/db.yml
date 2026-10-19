@@ -5,8 +5,8 @@ tasks:
   check-ownership:
     desc: Check schema ownership and test the checker
     cmds:
-      - python scripts/check_schema_owners.py --check
-      - python -m unittest scripts.test_check_schema_owners
+      - mise exec -- python scripts/check_schema_owners.py --check
+      - mise exec -- python -m unittest scripts.test_check_schema_owners
 
   test-schema:
     desc: Test schema initialization and migrations using Postgres from DATABASE_URL
@@ -14,8 +14,8 @@ tasks:
       vars: [DATABASE_URL]
     env:
       DATABASE_URL: '{{.DATABASE_URL}}'
-    cmd: python scripts/verify_schema_boot_order.py
+    cmd: mise exec -- python scripts/verify_schema_boot_order.py
 
   test-schema-docker:
     desc: Test schema initialization and migrations using temporary Postgres in Docker
-    cmd: python scripts/verify_schema_boot_order.py --start-container
+    cmd: mise exec -- python scripts/verify_schema_boot_order.py --start-container

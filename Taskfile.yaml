@@ -2,6 +2,7 @@
 version: "3"
 
 includes:
+  mise: ./tasks/mise.yml
   dev: ./tasks/dev.yml
   test: ./tasks/test.yml
   db: ./tasks/db.yml

@@ -21,65 +21,65 @@ tasks:
   sdk-py:
     desc: Run Python SDK tests
     dir: '{{.ROOT_DIR}}/packages/sdk-py'
-    cmd: python -m pytest tests/ -q
+    cmd: mise exec -- python -m pytest tests/ -q
 
   schemas:
     desc: Run shared schema tests
     env:
       PYTHONPATH: 'packages/sdk-py{{.PATH_LIST_SEPARATOR}}packages/schemas-py'
-    cmd: python -m pytest packages/schemas-py/tests/ -v
+    cmd: mise exec -- python -m pytest packages/schemas-py/tests/ -v
 
   ingest:
     desc: Run ingest service tests
     env:
       PYTHONPATH: 'packages/sdk-py{{.PATH_LIST_SEPARATOR}}packages/schemas-py{{.PATH_LIST_SEPARATOR}}services/ingest'
-    cmd: python -m pytest services/ingest/tests/ -v
+    cmd: mise exec -- python -m pytest services/ingest/tests/ -v
 
   detector:
     desc: Run detector service tests
     env:
       PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/detector'
-    cmd: python -m pytest services/detector/tests/ -v
+    cmd: mise exec -- python -m pytest services/detector/tests/ -v
 
   explainer:
     desc: Run explainer service tests
     env:
       PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/explainer'
-    cmd: python -m pytest services/explainer/tests/ -v
+    cmd: mise exec -- python -m pytest services/explainer/tests/ -v
 
   alerts:
     desc: Run alerts service tests
     env:
       PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/explainer{{.PATH_LIST_SEPARATOR}}services/alerts'
-    cmd: python -m pytest services/alerts/tests/ -v
+    cmd: mise exec -- python -m pytest services/alerts/tests/ -v
 
   api:
     desc: Run API service tests
     env:
       PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/explainer{{.PATH_LIST_SEPARATOR}}services/api'
-    cmd: python -m pytest services/api/tests/ -v
+    cmd: mise exec -- python -m pytest services/api/tests/ -v
 
   mcp:
     desc: Run MCP server tests
-    cmd: python -m pytest packages/mcp-server/tests/ -v
+    cmd: mise exec -- python -m pytest packages/mcp-server/tests/ -v
 
   semantic:
     desc: Run semantic service tests
     env:
       PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}services/explainer{{.PATH_LIST_SEPARATOR}}services/semantic'
-    cmd: python -m pytest services/semantic/tests/ -v
+    cmd: mise exec -- python -m pytest services/semantic/tests/ -v
 
   integrations:
     desc: Run integrations service tests
     env:
       PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}services/integrations'
-    cmd: python -m pytest services/integrations/tests/ -v
+    cmd: mise exec -- python -m pytest services/integrations/tests/ -v
 
   schema-parity:
     desc: Run cross-service schema and run-scoping tests
-    cmd: python -m pytest tests/ -v
+    cmd: mise exec -- python -m pytest tests/ -v
 
   sdk-ts:
     desc: Run TypeScript SDK tests
     dir: '{{.ROOT_DIR}}/packages/sdk-ts'
-    cmd: npm test
+    cmd: mise exec -- npm test

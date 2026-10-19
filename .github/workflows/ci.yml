@@ -12,9 +12,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
+          tools: python
+          cache_dependency_paths: .github/workflows/ci.yml
       # Pin ruff to the pre-commit-config version so CI matches local linting.
       # An unpinned `pip install ruff` pulls the latest release, whose newly
       # stabilized rules fail CI on untouched code even when nothing changed.
@@ -35,9 +36,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
+          tools: python
+          cache_dependency_paths: |
+            packages/sdk-py/pyproject.toml
+            packages/schemas-py/pyproject.toml
+            .github/workflows/ci.yml
       # The check imports dunetrace (detectors + packs) to read real names.
       - run: pip install -e packages/sdk-py
       # Fails if docs claim a detector/evaluator that doesn't exist in code.
@@ -80,19 +85,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
-          cache: pip
-          # Key the pip cache on this job's actual dependency source so the
-          # heavy langchain/langgraph install is reused across runs instead of
-          # re-resolved every time (the other jobs already set this).
-          cache-dependency-path: packages/sdk-py/pyproject.toml
+          tools: task python
+          cache_dependency_paths: packages/sdk-py/pyproject.toml
       # dev extra provides mypy + pytest-timeout, so no separate installs needed.
       - run: pip install -e "packages/sdk-py[dev,langchain]"
-      - uses: go-task/setup-task@v2
-        with:
-          version: "3.54.0"
       # Same Taskfile task `task test` uses, so the two cannot disagree about
       # which tests exist. PYTEST_ADDOPTS' --timeout kills (and dumps the stack
       # of) any single test that hangs, so a deadlock fails in seconds with a
@@ -113,11 +111,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: packages/schemas-py/pyproject.toml
+          tools: task python
+          cache_dependency_paths: |
+            packages/schemas-py/pyproject.toml
+            .github/workflows/ci.yml
       # Two non-obvious installs, both load-bearing:
       #   * the [metrics] extra (prometheus-client). dunetrace_schemas.metrics
       #     degrades to no-op metrics without it and sets CollectorRegistry to
@@ -128,9 +127,6 @@ jobs:
       #     falls back to SDK defaults when it is absent, so 16 of
       #     test_detector_config.py's assertions fail on parsed values.
       - run: pip install -e "packages/schemas-py[metrics]" PyYAML pytest pytest-timeout
-      - uses: go-task/setup-task@v2
-        with:
-          version: "3.54.0"
       # Both tasks come from tasks/test.yml so PYTHONPATH has one source of
       # truth. test:schemas puts packages/sdk-py on it for test_sdk_parity.py,
       # which imports dunetrace to check the generated enums still match; the
@@ -167,10 +163,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
-          cache: pip
+          tools: python
+          cache_dependency_paths: .github/workflows/ci.yml
       # Hook environments (ruff, bandit, the gitleaks Go binary) are expensive
       # to build and change only when the config's pinned revs do.
       - uses: actions/cache@v4
@@ -219,16 +215,15 @@ jobs:
             extra: pytest-asyncio
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: ${{ matrix.requirements }}
+          tools: task python
+          cache_dependency_paths: |
+            ${{ matrix.requirements }}
+            packages/sdk-py/pyproject.toml
+            .github/workflows/ci.yml
       - run: pip install -r ${{ matrix.requirements }} pytest pytest-asyncio pytest-timeout ${{ matrix.extra || '' }}
       - run: pip install -e packages/sdk-py
-      - uses: go-task/setup-task@v2
-        with:
-          version: "3.54.0"
       # Calls the Taskfile task so PYTHONPATH has exactly ONE source of truth.
       # Duplicating it here is what let this workflow drift and miss
       # packages/schemas-py, which broke the moment services began importing
@@ -246,10 +241,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
-          cache: pip
+          tools: python
+          cache_dependency_paths: |
+            packages/mcp-server/pyproject.toml
+            .github/workflows/ci.yml
       - run: pip install -e "packages/mcp-server" pytest pytest-timeout mypy
       - run: python -m pytest packages/mcp-server/tests/ -v --timeout=120
       - run: python -m mypy packages/mcp-server/dunetrace_mcp/ --ignore-missing-imports --no-error-summary
@@ -263,11 +260,10 @@ jobs:
         working-directory: packages/sdk-ts
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-tools
         with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: packages/sdk-ts/package-lock.json
+          tools: node
+          cache_dependency_paths: packages/sdk-ts/package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm run typecheck
@@ -297,9 +293,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
+          tools: python
       - run: python scripts/check_schema_owners.py --check
       - run: python -m unittest scripts.test_check_schema_owners
 
@@ -331,18 +327,18 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-tools
         with:
-          python-version: "3.12"
-          cache: pip
+          tools: task python
+          cache_dependency_paths: |
+            packages/schemas-py/pyproject.toml
+            packages/sdk-py/pyproject.toml
+            .github/workflows/ci.yml
       # The script boots every service's schema-init in turn, so it needs what
       # each of them imports at that point: asyncpg, the shared schemas package
       # and the SDK (explainer_svc and the detector both import dunetrace).
       - run: pip install asyncpg pydantic PyYAML
       - run: pip install -e packages/schemas-py -e packages/sdk-py
-      - uses: go-task/setup-task@v2
-        with:
-          version: "3.54.0"
       - name: Verify boot order, concurrency, idempotence and upgrade
         env:
           DATABASE_URL: postgresql://dunetrace:dunetrace@127.0.0.1:5432/postgres
