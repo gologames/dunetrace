@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+env:
+  MISE_EXEC_AUTO_INSTALL: "false"
+
 jobs:
   lint:
     name: Lint (Python)
