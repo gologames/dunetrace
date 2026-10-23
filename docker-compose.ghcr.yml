@@ -28,8 +28,7 @@
 # per-org Slack/Linear credential, delivered nothing, and still reported
 # healthy), the API had no GitHub App credentials, ingest had no ADMIN_API_KEY
 # (the bootstrap that mints the first API key) and no INTERNAL_TOKEN, and two
-# config mounts were missing. The one difference that is CORRECT and must stay:
-# no PYTHONPATH — the published images bake it in via Dockerfile ENV.
+# config mounts were missing.
 
 services:
   postgres:

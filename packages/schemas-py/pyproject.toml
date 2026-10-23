@@ -30,8 +30,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# dunetrace_schemas.metrics degrades to no-op metrics without it; the services
-# install it through their own requirements.txt.
 metrics = ["prometheus-client>=0.20"]
 
 [tool.setuptools.packages.find]
@@ -40,4 +38,3 @@ include = ["dunetrace_schemas*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts   = "-v --tb=short"

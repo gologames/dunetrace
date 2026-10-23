@@ -53,9 +53,9 @@ from alerts_svc.sender import SendResult, send_with_retry  # noqa: E402
 # Without prometheus_client every metric in dunetrace_schemas.metrics is a no-op
 # and each assertion below reads 0.0 from nothing. This used to be a
 # `skipUnless(metrics.AVAILABLE, ...)` on each class, i.e. a silent pass with
-# exit code 0 the moment the dependency was dropped from requirements.txt. It is
+# exit code 0 the moment the dependency was dropped from pyproject.toml. It is
 # now a hard error unless DUNETRACE_ALLOW_MISSING_TEST_DEPS is set.
-require_prometheus_client("services/alerts/requirements.txt")
+require_prometheus_client("services/alerts/pyproject.toml")
 assert metrics.AVAILABLE, "prometheus_client imports but metrics degraded to no-ops"
 
 

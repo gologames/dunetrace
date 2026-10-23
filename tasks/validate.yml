@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  endpoint-conventions:
+    desc: Validate org_id URL conventions
+    cmd: mise exec -- uv run --locked python scripts/check_endpoint_conventions.py
+
+  detector-docs:
+    desc: Validate detector names and counts in documentation
+    cmd: mise exec -- uv run --locked --no-dev --group test python scripts/validate_detector_docs.py
+
+  detector-docs-test:
+    desc: Test the detector documentation validator
+    cmd: mise exec -- uv run --locked --no-dev --group test python -m unittest scripts.test_validate_detector_docs
+
+  sdk-py-mypy:
+    desc: Check Python SDK types
+    cmd: mise exec -- uv run --locked --package dunetrace --no-dev --group lint --extra langchain python -m mypy packages/sdk-py/dunetrace/ --ignore-missing-imports --no-error-summary --config-file packages/sdk-py/pyproject.toml
+
+  mcp-mypy:
+    desc: Check MCP server types
+    cmd: mise exec -- uv run --locked --package dunetrace-mcp --no-dev --group lint python -m mypy packages/mcp-server/dunetrace_mcp/ --ignore-missing-imports --no-error-summary
+
+  ts-typecheck:
+    desc: Check TypeScript SDK types
+    dir: '{{.ROOT_DIR}}/packages/sdk-ts'
+    cmd: mise exec -- npm run typecheck

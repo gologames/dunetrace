@@ -14,14 +14,11 @@ behind three different escape hatches:
 
 all of which report ``skipped`` and **exit code 0** under pytest (a module-level
 ``unittest.SkipTest`` included — verified). Dropping ``prometheus-client`` from
-a service's ``requirements.txt``, or losing it to a transitive resolver
+a service's ``pyproject.toml``, or losing it to a transitive resolver
 conflict, therefore deleted ~90 tests into a skip count nobody reads while CI
 stayed green and the shipped image served a ``/metrics`` body saying the
 library was not installed — with the compose healthcheck on ``/ready`` still
 passing.
-
-So: a missing dependency is a hard error. The comments in those files asserted
-"CI installs requirements.txt"; this makes CI *prove* it instead.
 
 A developer who genuinely wants to run a suite without the library sets::
 
@@ -35,7 +32,7 @@ used, so the failure is a collection error rather than a per-test one)::
 
     from scripts.require_test_deps import require_prometheus_client
 
-    prometheus_client = require_prometheus_client("services/api/requirements.txt")
+    prometheus_client = require_prometheus_client("services/api/pyproject.toml")
 """
 
 from __future__ import annotations

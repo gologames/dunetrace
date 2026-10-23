@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  install:
+    desc: Install locked Python workspace development dependencies
+    cmd: mise exec -- uv sync --locked --all-packages --all-extras
+
+  update:
+    desc: Update Python dependencies in uv.lock
+    cmd: mise exec -- uv lock --upgrade

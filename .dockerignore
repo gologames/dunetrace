@@ -1,5 +1,5 @@
 # Build context exclusions. Every image in this repo builds with `context: .`
-# (services/*/Dockerfile and the legacy root Dockerfile), so without this file
+# (services/*/Dockerfile), so without this file
 # the whole working tree — host caches, virtualenvs, screenshots and the real
 # .env — is uploaded to the daemon and anything a COPY happens to cover is
 # baked into the published image.
@@ -51,6 +51,7 @@ htmlcov/
 # Virtualenvs. A host .venv is built for the host's OS/arch and is at best dead
 # weight, at worst a broken import path shadowing the image's own site-packages.
 .venv/
+**/.venv/
 venv/
 env/
 ENV/
@@ -59,17 +60,8 @@ ENV/
 .env
 .env.*
 
-# Tests. No runtime import path reaches them and they only inflate the image —
-# ~7.8MB off the api image alone (services/api/tests + packages/sdk-py/tests +
-# packages/schemas-py/tests). services/explainer is the one exception: that
-# image exists solely to run its own suite (its CMD is
-# `pytest services/explainer/tests/`), so excluding them would break it.
-# A .dockerignore is per-CONTEXT, not per-Dockerfile, so this exception also
-# leaves explainer's 344KB of tests in the three images that COPY
-# services/explainer/ (alerts, api, semantic). That is the cheaper half of the
-# trade against breaking the one Dockerfile whose whole purpose is those tests.
+# Tests are not needed in runtime images.
 **/tests/
-!services/explainer/tests/
 
 # Node
 node_modules/

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dunetrace-explainer"
+version = "0.0.0"
+requires-python = ">=3.12"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+    "dunetrace",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["explainer_svc*"]

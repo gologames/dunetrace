@@ -59,7 +59,6 @@ from urllib.parse import urlsplit, urlunsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# The union of every test task's PYTHONPATH in tasks/test.yml.
 SERVICE_PATHS = [
     "packages/schemas-py",
     "packages/sdk-py",

@@ -17,14 +17,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: python
-          cache_dependency_paths: .github/workflows/ci.yml
-      # Pin ruff to the pre-commit-config version so CI matches local linting.
-      # An unpinned `pip install ruff` pulls the latest release, whose newly
-      # stabilized rules fail CI on untouched code even when nothing changed.
-      - run: pip install ruff==0.15.11
-      - run: ruff check .
-      - run: ruff format --check .
+          tools: python uv
+      - run: uv sync --locked --no-dev --group lint
+      - run: uv run --locked --no-dev --group lint ruff check .
+      - run: uv run --locked --no-dev --group lint ruff format --check .
       # Dashboard safety: no inline handlers / javascript: URLs / eval in
       # dashboard/, every data-action names a key of the ACTIONS registry, and
       # nginx.conf's CSP script-src hash matches the page's inline <script>.
@@ -41,45 +37,40 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: python
-          cache_dependency_paths: |
-            packages/sdk-py/pyproject.toml
-            packages/schemas-py/pyproject.toml
-            .github/workflows/ci.yml
+          tools: task python uv
       # The check imports dunetrace (detectors + packs) to read real names.
-      - run: pip install -e packages/sdk-py
+      - run: uv sync --locked --no-dev --group test
       # Fails if docs claim a detector/evaluator that doesn't exist in code.
-      - run: python scripts/validate_detector_docs.py
-      - run: python -m unittest scripts.test_validate_detector_docs
+      - run: task validate:detector-docs
+      - run: task validate:detector-docs-test
       # EventType / Severity / FailureType are generated into both the SDK and
       # dunetrace_schemas from enum_source.py; fails if either module is stale
       # (edit the source, run `python scripts/gen_enums.py`). Stdlib only.
-      - run: python scripts/gen_enums.py --check
-      - run: python -m unittest scripts.test_gen_enums
+      - run: uv run --locked --no-dev --group test python scripts/gen_enums.py --check
+      - run: uv run --locked --no-dev --group test python -m unittest scripts.test_gen_enums
       # detectors.yml, the detector classes, and the shared parser's _PARAM_MAP
       # all have to agree: an unmapped YAML key is dropped with a startup
       # warning nobody reads, and a _PARAM_MAP entry aimed at a renamed
       # attribute produces no warning at all. Needs PyYAML to read the file and
       # dunetrace_schemas (hence pydantic) for _PARAM_MAP.
-      - run: pip install -e packages/schemas-py pyyaml
-      - run: python scripts/check_detector_defaults.py
-      - run: python -m unittest scripts.test_check_detector_defaults
+      - run: uv run --locked --no-dev --group test python scripts/check_detector_defaults.py
+      - run: uv run --locked --no-dev --group test python -m unittest scripts.test_check_detector_defaults
       # Every docs/integrate-*.md must carry a <!--dunetrace:instrument--> block.
       # The dunetrace-setup skill (dunetrace/skills) generates one reference file
       # per block; a guide that loses its block silently drops out of the skill's
       # framework matching table, which is a silent no-op of exactly the kind the
       # guides themselves warn about. This only proves the guides parse -- the
       # authoritative drift check runs in the skills repo, which has both trees.
-      - run: python scripts/gen_skill_references.py --out "$(mktemp -d)" --require-all
-      - run: python -m unittest scripts.test_gen_skill_references
+      - run: uv run --locked --no-dev --group test python scripts/gen_skill_references.py --out "$(mktemp -d)" --require-all
+      - run: uv run --locked --no-dev --group test python -m unittest scripts.test_gen_skill_references
       # The detector coverage manifest the skill reads. This step is the audit:
       # it fails if a detector is not described in
       # scripts/detector_event_requirements.json, or if a detector reads a
       # RunState field that its entry neither requires nor enriches. A new
       # detector therefore cannot land without saying what instrumentation it
       # needs, which is what keeps the coverage report's counts honest.
-      - run: python scripts/gen_detector_manifest.py --out "$(mktemp -d)"
-      - run: python -m unittest scripts.test_gen_detector_manifest
+      - run: uv run --locked --no-dev --group test python scripts/gen_detector_manifest.py --out "$(mktemp -d)"
+      - run: uv run --locked --no-dev --group test python -m unittest scripts.test_gen_detector_manifest
 
   sdk-py:
     name: SDK (Python)
@@ -90,10 +81,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: task python
-          cache_dependency_paths: packages/sdk-py/pyproject.toml
-      # dev extra provides mypy + pytest-timeout, so no separate installs needed.
-      - run: pip install -e "packages/sdk-py[dev,langchain]"
+          tools: task python uv
+      - run: uv sync --locked --package dunetrace --no-dev --group test --group lint --extra langchain
       # Same Taskfile task `task test` uses, so the two cannot disagree about
       # which tests exist. PYTEST_ADDOPTS' --timeout kills (and dumps the stack
       # of) any single test that hangs, so a deadlock fails in seconds with a
@@ -102,7 +91,7 @@ jobs:
         env:
           PYTEST_ADDOPTS: --timeout=120
         run: task test:sdk-py
-      - run: python -m mypy packages/sdk-py/dunetrace/ --ignore-missing-imports --no-error-summary --config-file packages/sdk-py/pyproject.toml
+      - run: task validate:sdk-py-mypy
 
   # `task test` runs twelve suites; this workflow's other jobs covered ten of
   # them. test-schemas (132 tests) and test-schema-parity (4) ran in NO CI job
@@ -116,24 +105,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: task python
-          cache_dependency_paths: |
-            packages/schemas-py/pyproject.toml
-            .github/workflows/ci.yml
-      # Two non-obvious installs, both load-bearing:
-      #   * the [metrics] extra (prometheus-client). dunetrace_schemas.metrics
-      #     degrades to no-op metrics without it and sets CollectorRegistry to
-      #     None, so tests/test_metrics.py — which calls it — fails 10 of its
-      #     17 tests rather than skipping. Nothing else in this repo installs
-      #     the extra; the services get prometheus-client via requirements.txt.
-      #   * PyYAML. dunetrace_schemas.detector_config imports yaml lazily and
-      #     falls back to SDK defaults when it is absent, so 16 of
-      #     test_detector_config.py's assertions fail on parsed values.
-      - run: pip install -e "packages/schemas-py[metrics]" PyYAML pytest pytest-timeout
-      # Both tasks come from tasks/test.yml so PYTHONPATH has one source of
-      # truth. test:schemas puts packages/sdk-py on it for test_sdk_parity.py,
-      # which imports dunetrace to check the generated enums still match; the
-      # SDK has no required dependencies, so the source tree is enough.
+          tools: task python uv
+      - run: uv sync --locked --package dunetrace-schemas --no-dev --group test
       - name: Run schemas tests
         env:
           PYTEST_ADDOPTS: --timeout=120
@@ -168,17 +141,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: python
-          cache_dependency_paths: .github/workflows/ci.yml
+          tools: task python uv
       # Hook environments (ruff, bandit, the gitleaks Go binary) are expensive
       # to build and change only when the config's pinned revs do.
       - uses: actions/cache@v4
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-      # Pinned for the same reason ruff is above: an unpinned pre-commit can
-      # change hook semantics under untouched code.
-      - run: pip install pre-commit==4.6.0
+      - run: uv sync --locked --no-dev --group lint
       - name: Run hooks
         env:
           SKIP: >-
@@ -186,7 +156,7 @@ jobs:
             sdk-py-mypy,mcp-mypy,ts-typecheck,sdk-py-tests,schemas-py-tests,
             ingest-tests,detector-tests,explainer-tests,alerts-tests,api-tests,
             mcp-tests,sdk-ts-tests
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: uv run --locked --no-dev --group lint pre-commit run --all-files --show-diff-on-failure
 
   services:
     name: ${{ matrix.service }}
@@ -197,42 +167,18 @@ jobs:
       matrix:
         include:
           - service: ingest
-            requirements: services/ingest/requirements.txt
-            extra: httpx pytest-asyncio
           - service: detector
-            requirements: services/detector/requirements.txt
           - service: explainer
-            requirements: services/explainer/requirements.txt
           - service: alerts
-            requirements: services/alerts/requirements.txt
           - service: api
-            requirements: services/api/requirements.txt
-          # audit Finding 35: semantic + integrations were EXCLUDED from CI, which
-          # is why a broken requirements pin (F3) and packaging (F17) shipped
-          # undetected. They are now tested like every other service.
           - service: semantic
-            requirements: services/semantic/requirements.txt
-            extra: pytest-asyncio
           - service: integrations
-            requirements: services/integrations/requirements.txt
-            extra: pytest-asyncio
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: task python
-          cache_dependency_paths: |
-            ${{ matrix.requirements }}
-            packages/sdk-py/pyproject.toml
-            .github/workflows/ci.yml
-      - run: pip install -r ${{ matrix.requirements }} pytest pytest-asyncio pytest-timeout ${{ matrix.extra || '' }}
-      - run: pip install -e packages/sdk-py
-      # Calls the Taskfile task so PYTHONPATH has exactly ONE source of truth.
-      # Duplicating it here is what let this workflow drift and miss
-      # packages/schemas-py, which broke the moment services began importing
-      # dunetrace_schemas (migrations, key hashing, scopes).
-      # PYTEST_ADDOPTS keeps the timeout that kills and dumps the stack of any
-      # single hung test.
+          tools: task python uv
+      - run: uv sync --locked --package dunetrace-${{ matrix.service }} --no-dev --group test
       - name: Run tests
         env:
           PYTEST_ADDOPTS: --timeout=120
@@ -246,13 +192,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: python
-          cache_dependency_paths: |
-            packages/mcp-server/pyproject.toml
-            .github/workflows/ci.yml
-      - run: pip install -e "packages/mcp-server" pytest pytest-timeout mypy
-      - run: python -m pytest packages/mcp-server/tests/ -v --timeout=120
-      - run: python -m mypy packages/mcp-server/dunetrace_mcp/ --ignore-missing-imports --no-error-summary
+          tools: task python uv
+      - run: uv sync --locked --package dunetrace-mcp --no-dev --group test --group lint
+      - run: uv run --locked --package dunetrace-mcp --no-dev --group test python -m pytest packages/mcp-server/tests/ --timeout=120
+      - run: task validate:mcp-mypy
 
   sdk-ts:
     name: SDK (TypeScript)
@@ -265,11 +208,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: node
+          tools: task node
           cache_dependency_paths: packages/sdk-ts/package-lock.json
       - run: npm ci
       - run: npm test
-      - run: npm run typecheck
+      - run: task validate:ts-typecheck
 
   # audit Finding 35: build every service image on PR. Previously images were only
   # built on release tags, so broken Dockerfiles / unsatisfiable requirements
@@ -332,16 +275,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tools
         with:
-          tools: task python
-          cache_dependency_paths: |
-            packages/schemas-py/pyproject.toml
-            packages/sdk-py/pyproject.toml
-            .github/workflows/ci.yml
+          tools: task python uv
       # The script boots every service's schema-init in turn, so it needs what
       # each of them imports at that point: asyncpg, the shared schemas package
       # and the SDK (explainer_svc and the detector both import dunetrace).
-      - run: pip install asyncpg pydantic PyYAML
-      - run: pip install -e packages/schemas-py -e packages/sdk-py
+      - run: uv sync --locked --no-dev --group test
       - name: Verify boot order, concurrency, idempotence and upgrade
         env:
           DATABASE_URL: postgresql://dunetrace:dunetrace@127.0.0.1:5432/postgres

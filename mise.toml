@@ -14,4 +14,8 @@ lockfile_platforms = [
 [tools]
 task = "3.54.0"
 python = "3.12.15"
+uv = "0.13.1"
 node = "22.23.3"
+
+[env]
+UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }

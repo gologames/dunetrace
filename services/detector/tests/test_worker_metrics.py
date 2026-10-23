@@ -40,7 +40,7 @@ from scripts.require_test_deps import require_prometheus_client  # noqa: E402
 # `raise unittest.SkipTest(...)`, which pytest reports as `1 skipped` and exit
 # code 0 — dropping the dependency deleted the whole file and CI stayed green.
 # It is now a hard error unless DUNETRACE_ALLOW_MISSING_TEST_DEPS is set.
-REGISTRY = require_prometheus_client("services/detector/requirements.txt").REGISTRY
+REGISTRY = require_prometheus_client("services/detector/pyproject.toml").REGISTRY
 assert shared_metrics.AVAILABLE, "prometheus_client imports but metrics degraded to no-ops"
 
 

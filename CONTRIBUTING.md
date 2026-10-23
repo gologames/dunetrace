@@ -27,8 +27,8 @@ cd dunetrace
 
 mise install --locked  # first-time setup; afterwards use `task mise:install`
 
-# Install the local Python SDK and its development dependencies
-python -m pip install -e "packages/sdk-py[dev,langchain]"
+task uv:install
+npm --prefix packages/sdk-ts ci
 ```
 
 ## Running services
@@ -84,9 +84,8 @@ Install the git hooks once — they run ruff, mypy, the docs-consistency check,
 and the test suites on the files you touched:
 
 ```bash
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files   # to check everything up front
+uv run --locked pre-commit install
+uv run --locked pre-commit run --all-files   # to check everything up front
 ```
 
 CI runs the same checks. The most common first-PR failure is the **generated
@@ -101,7 +100,7 @@ guide covers this.
 ## Opening the PR
 
 1. Fork, branch off `main`.
-2. Make the change, add tests, run `task test` + `pre-commit run --all-files`.
+2. Make the change, add tests, run `task test` + `uv run --locked pre-commit run --all-files`.
 3. Push and open a PR describing what and why. Link the issue (`Fixes #NN`).
 4. New detectors ship **shadow by default** (they don't alert until validated on
    real traffic) — the guide explains how.

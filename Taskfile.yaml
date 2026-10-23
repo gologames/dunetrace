@@ -3,6 +3,8 @@ version: "3"
 
 includes:
   mise: ./tasks/mise.yml
+  uv: ./tasks/uv.yml
   dev: ./tasks/dev.yml
   test: ./tasks/test.yml
+  validate: ./tasks/validate.yml
   db: ./tasks/db.yml

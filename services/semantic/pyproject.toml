@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dunetrace-semantic"
+version = "0.0.0"
+requires-python = ">=3.12"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+    "dunetrace-schemas[metrics]",
+    "dunetrace-explainer",
+    "asyncpg==0.29.0",
+    "python-dotenv>=1.2.2,<2.0.0",
+    "PyYAML>=6.0",
+    "deepeval==4.0.9",
+    "anthropic>=0.40",
+    "mistralai>=2.0",
+    "pydantic>=2.11.7,<3.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["semantic_svc*"]

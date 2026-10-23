@@ -1,5 +1,18 @@
+# syntax=docker/dockerfile:1.20
 FROM python:3.12-slim
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.1 /uv /bin/uv
+
 WORKDIR /app
+
+ENV UV_PYTHON_DOWNLOADS=0 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Non-root runtime. python:3.12-slim's default user is uid 0, so without this a
 # container escape or an RCE through any dependency starts as root holding
@@ -14,35 +27,31 @@ WORKDIR /app
 # open(..., "w"), os.makedirs or tempfile anywhere under services/), so the
 # running process can read its own code and cannot rewrite it.
 #
-# Declared before the pip layer so it caches: this never changes.
+# Declared before the dependency layer so it caches: this never changes.
 RUN groupadd --gid 10001 dunetrace \
  && useradd --uid 10001 --gid 10001 --create-home --home-dir /home/dunetrace \
             --shell /usr/sbin/nologin dunetrace
 
-# requirements BEFORE any source. This was the only one of the seven images that
-# copied packages/schemas-py/ first, so every edit anywhere under that package
-# invalidated the pip layer and forced a full reinstall of cryptography,
-# asyncpg, httpx and pydantic — twice per release, since the image is built for
-# amd64 and arm64 and the non-native half runs under QEMU.
-COPY services/integrations/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml uv.lock ./
+COPY --parents packages/*/pyproject.toml services/*/pyproject.toml ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --package dunetrace-integrations --no-install-workspace
+
 COPY packages/schemas-py/ packages/schemas-py/
 COPY services/integrations/ services/integrations/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --package dunetrace-integrations --no-editable
 
-ENV PYTHONPATH=/app/packages/schemas-py:/app/services/integrations
 # Set explicitly rather than inherited from /etc/passwd, so `~` expansion is a
 # property of this image and not of the runtime's user lookup.
 ENV HOME=/home/dunetrace
-# As uid 10001 CPython cannot write __pycache__ into the root-owned tree and
-# silently gives up on every import. Make that explicit instead of implicit.
-ENV PYTHONDONTWRITEBYTECODE=1
 # Build identity. Every service resolves APP_VERSION, else GIT_COMMIT, else a
 # hardcoded fallback, and reports the result as dunetrace_build_info{service,
 # version} and in GET /health. Nothing used to supply either, so every
 # published image claimed the fallback version forever.
 # .github/workflows/docker-publish.yml passes --build-arg APP_VERSION=<release
 # tag>; an empty value here is harmless (the getenv chain treats "" as unset).
-# Declared last on purpose: a version bump must not invalidate the pip layer.
+# Declared last on purpose: a version bump must not invalidate the dependency layer.
 ARG APP_VERSION=""
 ENV APP_VERSION=${APP_VERSION}
 

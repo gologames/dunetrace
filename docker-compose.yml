@@ -94,7 +94,6 @@ services:
       AUTH_MODE: ${AUTH_MODE:-dev}
       ADMIN_API_KEY: ${ADMIN_API_KEY:-}
       INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
-      PYTHONPATH: /app/packages/schemas-py:/app/services/ingest
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       # Retention pass (partition drop + signal-evidence scrub), run at startup
       # then daily by ingest_svc's lifespan. See docs/operations.md.
@@ -137,7 +136,6 @@ services:
       STALL_TIMEOUT_SECS: ${STALL_TIMEOUT_SECS:-60}
       # /metrics, /ready, /health for the healthcheck below and a scraper
       METRICS_PORT: 9101
-      PYTHONPATH: /app/packages/schemas-py:/app/packages/sdk-py:/app/services/detector
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       BATCH_SIZE: ${BATCH_SIZE:-100}
       DETECTOR_CONCURRENCY: ${DETECTOR_CONCURRENCY:-8}
@@ -201,7 +199,6 @@ services:
       # workers that share those names want different values.
       POLL_INTERVAL: 10
       METRICS_PORT: 9102
-      PYTHONPATH: /app/packages/schemas-py:/app/packages/sdk-py:/app/services/explainer:/app/services/alerts
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
       SLACK_CHANNEL: ${SLACK_CHANNEL:-}
       SLACK_MIN_SEVERITY: ${SLACK_MIN_SEVERITY:-LOW}
@@ -286,9 +283,6 @@ services:
       USER_FRUSTRATION_MODEL: ${USER_FRUSTRATION_MODEL:-}
       CONFUSION_LOOP_MODEL: ${CONFUSION_LOOP_MODEL:-}
       SYCOPHANCY_SIGNAL_MODEL: ${SYCOPHANCY_SIGNAL_MODEL:-}
-      # audit Finding 17: this env override was dropping /app/packages/sdk-py, so
-      # explainer_svc's `import dunetrace` failed even after the Dockerfile fix.
-      PYTHONPATH: /app/packages/schemas-py:/app/packages/sdk-py:/app/services/explainer:/app/services/semantic
     depends_on:
       postgres:
         condition: service_healthy
@@ -317,7 +311,6 @@ services:
       INTEGRATIONS_METRICS_PORT: 9104
       INTEGRATIONS_WORKER_ENABLED: ${INTEGRATIONS_WORKER_ENABLED:-false}
       DUNETRACE_MASTER_KEY: ${DUNETRACE_MASTER_KEY:-}
-      PYTHONPATH: /app/packages/schemas-py:/app/services/integrations
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       APP_VERSION:
     depends_on:
@@ -353,7 +346,6 @@ services:
       ELEVENLABS_METRICS_PORT: 9105
       ELEVENLABS_WORKER_ENABLED: ${ELEVENLABS_WORKER_ENABLED:-false}
       DUNETRACE_MASTER_KEY: ${DUNETRACE_MASTER_KEY:-}
-      PYTHONPATH: /app/packages/schemas-py:/app/services/integrations
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       APP_VERSION:
     depends_on:
@@ -380,7 +372,6 @@ services:
       DATABASE_URL: postgresql://dunetrace:dunetrace@postgres:5432/dunetrace
       ENV: ${ENV:-dev}
       AUTH_MODE: ${AUTH_MODE:-dev}
-      PYTHONPATH: /app/packages/schemas-py:/app/packages/sdk-py:/app/services/explainer:/app/services/api
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}

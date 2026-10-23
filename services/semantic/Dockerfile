@@ -1,5 +1,18 @@
+# syntax=docker/dockerfile:1.20
 FROM python:3.12-slim
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.1 /uv /bin/uv
+
 WORKDIR /app
+
+ENV UV_PYTHON_DOWNLOADS=0 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Non-root runtime. python:3.12-slim's default user is uid 0, so without this a
 # container escape or an RCE through any dependency starts as root holding
@@ -15,21 +28,22 @@ WORKDIR /app
 # running process can read its own code and cannot rewrite it. deepeval is the
 # one exception — see DEEPEVAL_CACHE_FOLDER below.
 #
-# Declared before the pip layer so it caches: this never changes.
+# Declared before the dependency layer so it caches: this never changes.
 RUN groupadd --gid 10001 dunetrace \
  && useradd --uid 10001 --gid 10001 --create-home --home-dir /home/dunetrace \
             --shell /usr/sbin/nologin dunetrace
 
-COPY services/semantic/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-# audit Finding 17 (HIGH): explainer_svc imports `dunetrace` (the SDK), so the
-# sdk-py package must be present + on PYTHONPATH — it was missing here, which
-# crash-looped the worker. Matches services/alerts/Dockerfile. (Authorized during
-# audit to enable Phase 3 semantic testing.)
+COPY pyproject.toml uv.lock ./
+COPY --parents packages/*/pyproject.toml services/*/pyproject.toml ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --package dunetrace-semantic --no-install-workspace
+
 COPY packages/schemas-py/ packages/schemas-py/
 COPY packages/sdk-py/ packages/sdk-py/
 COPY services/explainer/ services/explainer/
 COPY services/semantic/ services/semantic/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --package dunetrace-semantic --no-editable
 
 # Default sampling rates and evaluator config, baked in.
 #
@@ -48,7 +62,6 @@ COPY services/semantic/ services/semantic/
 COPY docs/config/semantic-sampling.yml /app/docs/config/semantic-sampling.yml
 COPY docs/config/semantic-evaluators.yml /app/docs/config/semantic-evaluators.yml
 
-ENV PYTHONPATH=/app/packages/schemas-py:/app/packages/sdk-py:/app/services/explainer:/app/services/semantic
 # Set explicitly rather than inherited from /etc/passwd, so `~` expansion is a
 # property of this image and not of the runtime's user lookup.
 ENV HOME=/home/dunetrace
@@ -60,16 +73,13 @@ ENV HOME=/home/dunetrace
 # DEEPEVAL_CACHE_FOLDER is deepeval's own override for that path
 # (deepeval/constants.py) — point it at the runtime user's writable home.
 ENV DEEPEVAL_CACHE_FOLDER=/home/dunetrace/.deepeval
-# As uid 10001 CPython cannot write __pycache__ into the root-owned tree and
-# silently gives up on every import. Make that explicit instead of implicit.
-ENV PYTHONDONTWRITEBYTECODE=1
 # Build identity. Every service resolves APP_VERSION, else GIT_COMMIT, else a
 # hardcoded fallback, and reports the result as dunetrace_build_info{service,
 # version} and in GET /health. Nothing used to supply either, so every
 # published image claimed the fallback version forever.
 # .github/workflows/docker-publish.yml passes --build-arg APP_VERSION=<release
 # tag>; an empty value here is harmless (the getenv chain treats "" as unset).
-# Declared last on purpose: a version bump must not invalidate the pip layer.
+# Declared last on purpose: a version bump must not invalidate the dependency layer.
 ARG APP_VERSION=""
 ENV APP_VERSION=${APP_VERSION}
 

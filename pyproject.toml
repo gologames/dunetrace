@@ -1,0 +1,43 @@
+[project]
+name = "dunetrace-workspace"
+version = "0.0.0"
+requires-python = ">=3.12"
+
+[dependency-groups]
+dev = [
+    { include-group = "test" },
+    { include-group = "lint" },
+]
+test = [
+    "asyncpg==0.29.0",
+    "dunetrace",
+    "dunetrace-schemas[metrics]",
+    "httpx>=0.27",
+    "pytest>=8.3.4",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-timeout",
+    "PyYAML>=6.0",
+    "regex",
+]
+lint = [
+    "mypy",
+    "pre-commit==4.6.0",
+    "ruff==0.15.11",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+    "packages/sdk-py",
+    "packages/schemas-py",
+    "packages/mcp-server",
+    "services/*",
+]
+
+[tool.uv.sources]
+dunetrace = { workspace = true }
+dunetrace-schemas = { workspace = true }
+dunetrace-explainer = { workspace = true }

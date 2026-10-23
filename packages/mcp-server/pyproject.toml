@@ -52,4 +52,3 @@ dunetrace_mcp = ["_docs/*.md", "_docs/*/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts   = "-v --tb=short"

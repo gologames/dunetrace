@@ -52,7 +52,7 @@ repos:
       - id: endpoint-conventions
         name: org_id-not-in-URL-path convention
         language: system
-        entry: python scripts/check_endpoint_conventions.py
+        entry: task validate:endpoint-conventions
         pass_filenames: false
         files: ^services/.*/routers/.*\.py$
 
@@ -62,7 +62,7 @@ repos:
       - id: validate-detector-docs
         name: Detector/evaluator name consistency (docs vs code)
         language: system
-        entry: python scripts/validate_detector_docs.py
+        entry: task validate:detector-docs
         pass_filenames: false
         files: ^(README\.md|docs/.+\.md|packages/sdk-py/dunetrace/(detectors\.py|packs/.+\.py)|services/semantic/semantic_svc/evaluators/.+\.py)$
 
@@ -72,39 +72,30 @@ repos:
       - id: validate-detector-docs-test
         name: Detector-docs drift check — unit tests
         language: system
-        entry: python -m unittest scripts.test_validate_detector_docs
+        entry: task validate:detector-docs-test
         pass_filenames: false
         files: ^(scripts/(validate_detector_docs|test_validate_detector_docs)\.py|packages/sdk-py/dunetrace/(detectors\.py|packs/.+\.py)|services/semantic/semantic_svc/evaluators/.+\.py)$
 
       - id: sdk-py-mypy
         name: SDK (Python) mypy
         language: system
-        entry: python -m mypy packages/sdk-py/dunetrace/ --ignore-missing-imports --no-error-summary --config-file packages/sdk-py/pyproject.toml
+        entry: task validate:sdk-py-mypy
         pass_filenames: false
         files: ^packages/sdk-py/.*\.py$
 
       - id: ts-typecheck
         name: TypeScript typecheck
         language: system
-        entry: bash -c 'cd packages/sdk-ts && npm run typecheck'
+        entry: task validate:ts-typecheck
         pass_filenames: false
         files: ^packages/sdk-ts/.*\.(ts|json)$
 
       - id: mcp-mypy
         name: MCP server mypy
         language: system
-        entry: python -m mypy packages/mcp-server/dunetrace_mcp/ --ignore-missing-imports --no-error-summary
+        entry: task validate:mcp-mypy
         pass_filenames: false
         files: ^packages/mcp-server/.*\.py$
-
-      # Test hooks below call `task test:*` so the PYTHONPATH for
-      # each service has exactly one source of truth — duplicating it here
-      # too is what let ci.yml's ingest PYTHONPATH silently drift and miss
-      # packages/schemas-py, which only mattered once ingest_svc/schemas.py
-      # started importing dunetrace_schemas. `files:` patterns cover every
-      # package a given suite actually depends on, not just its own service
-      # directory, so a change to a shared package still triggers the right
-      # tests.
 
       - id: sdk-py-tests
         name: SDK (Python) tests

@@ -35,13 +35,13 @@ if _ROOT not in sys.path:
 
 from scripts.require_test_deps import require_prometheus_client  # noqa: E402
 
-# The API image pins prometheus-client (services/api/requirements.txt), so a
+# The API image requires metrics support (services/api/pyproject.toml), so a
 # missing package here is an environment problem, not a legitimate no-op path
 # — that path is covered by packages/schemas-py/tests/test_metrics.py.
 # `pytest.importorskip` used to turn "the pin was dropped" into a silent skip
 # with exit code 0; it is now a hard error unless the developer opts out with
 # DUNETRACE_ALLOW_MISSING_TEST_DEPS.
-prometheus_client = require_prometheus_client("services/api/requirements.txt")
+prometheus_client = require_prometheus_client("services/api/pyproject.toml")
 
 
 def _sample(name: str, labels: dict) -> float:

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dunetrace-detector"
+version = "0.0.0"
+requires-python = ">=3.12"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+    "dunetrace",
+    "dunetrace-schemas[metrics]",
+    "asyncpg==0.29.0",
+    "python-dotenv>=1.2.2",
+    "PyYAML>=6.0",
+    "regex==2026.6.28",
+    "opentelemetry-api>=1.28.0",
+    "opentelemetry-sdk>=1.28.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.28.0",
+    "pydantic>=2.11.7,<3.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["detector_svc*"]

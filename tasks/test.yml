@@ -20,64 +20,47 @@ tasks:
 
   sdk-py:
     desc: Run Python SDK tests
-    dir: '{{.ROOT_DIR}}/packages/sdk-py'
-    cmd: mise exec -- python -m pytest tests/ -q
+    cmd: mise exec -- uv run --locked --package dunetrace --no-dev --group test --extra langchain python -m pytest packages/sdk-py/tests/
 
   schemas:
     desc: Run shared schema tests
-    env:
-      PYTHONPATH: 'packages/sdk-py{{.PATH_LIST_SEPARATOR}}packages/schemas-py'
-    cmd: mise exec -- python -m pytest packages/schemas-py/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-schemas --no-dev --group test python -m pytest packages/schemas-py/tests/
 
   ingest:
     desc: Run ingest service tests
-    env:
-      PYTHONPATH: 'packages/sdk-py{{.PATH_LIST_SEPARATOR}}packages/schemas-py{{.PATH_LIST_SEPARATOR}}services/ingest'
-    cmd: mise exec -- python -m pytest services/ingest/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-ingest --no-dev --group test python -m pytest services/ingest/tests/
 
   detector:
     desc: Run detector service tests
-    env:
-      PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/detector'
-    cmd: mise exec -- python -m pytest services/detector/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-detector --no-dev --group test python -m pytest services/detector/tests/
 
   explainer:
     desc: Run explainer service tests
-    env:
-      PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/explainer'
-    cmd: mise exec -- python -m pytest services/explainer/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-explainer --no-dev --group test python -m pytest services/explainer/tests/
 
   alerts:
     desc: Run alerts service tests
-    env:
-      PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/explainer{{.PATH_LIST_SEPARATOR}}services/alerts'
-    cmd: mise exec -- python -m pytest services/alerts/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-alerts --no-dev --group test python -m pytest services/alerts/tests/
 
   api:
     desc: Run API service tests
-    env:
-      PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}packages/sdk-py{{.PATH_LIST_SEPARATOR}}services/explainer{{.PATH_LIST_SEPARATOR}}services/api'
-    cmd: mise exec -- python -m pytest services/api/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-api --no-dev --group test python -m pytest services/api/tests/
 
   mcp:
     desc: Run MCP server tests
-    cmd: mise exec -- python -m pytest packages/mcp-server/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-mcp --no-dev --group test python -m pytest packages/mcp-server/tests/
 
   semantic:
     desc: Run semantic service tests
-    env:
-      PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}services/explainer{{.PATH_LIST_SEPARATOR}}services/semantic'
-    cmd: mise exec -- python -m pytest services/semantic/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-semantic --no-dev --group test python -m pytest services/semantic/tests/
 
   integrations:
     desc: Run integrations service tests
-    env:
-      PYTHONPATH: 'packages/schemas-py{{.PATH_LIST_SEPARATOR}}services/integrations'
-    cmd: mise exec -- python -m pytest services/integrations/tests/ -v
+    cmd: mise exec -- uv run --locked --package dunetrace-integrations --no-dev --group test python -m pytest services/integrations/tests/
 
   schema-parity:
     desc: Run cross-service schema and run-scoping tests
-    cmd: mise exec -- python -m pytest tests/ -v
+    cmd: mise exec -- uv run --locked --no-dev --group test python -m pytest tests/
 
   sdk-ts:
     desc: Run TypeScript SDK tests
